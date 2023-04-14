@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+env:
+  GITHUB_BUILD_NUMBER: ${{ github.run_number }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -43,7 +45,8 @@ jobs:
           context: .
           file: ./Dockerfile
           push: false
-          tags: my-app:${{ github.sha }}
+          tags: my-app:${{ env.GITHUB_BUILD_NUMBER }}
+          build-args: GITHUB_BUILD_NUMBER=${{ env.GITHUB_BUILD_NUMBER }}
 
       - name: Push Docker image to Amazon ECR
         if: ${{ success() }}

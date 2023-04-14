@@ -43,7 +43,7 @@ module.exports = {
   plugins: [new Dotenv()],
   performance: {
     hints: false,
-    maxAssetSize: 950000, // You can increase this value to a size that suits your needs
-    maxEntrypointSize: 950000, // You can increase this value to a size that suits your needs
+    maxAssetSize: 950000,  
+    maxEntrypointSize: 950000, 
   }
 };

@@ -14,7 +14,7 @@ describe('app', () => {
       const hasVersionNumber = content.includes(config.version);
       return hasVersion && hasVersionNumber;
     });
-
+              
     expect(titleElement).toBeTruthy();
   });
 });

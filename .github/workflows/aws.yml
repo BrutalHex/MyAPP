@@ -12,24 +12,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up Node.js environment
+      - name: Node.js environment
         uses: actions/setup-node@v2
         with:
           node-version: '14.x'
 
-      - name: Install dependencies
+      - name: add dependencies
         run: npm install
 
-      - name: Run tests
+      - name: execute   tests
         run: npm run test
-      - name: Configure AWS Credentials
+
+      - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
   
-      - name: Login to Amazon ECR
+      - name: ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
         with:
@@ -38,28 +39,31 @@ jobs:
            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
            aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build and tag Docker image
+      - name: update Version
+        run: |
+           sed -i "s/^VERSION=.*/VERSION=${{ env.GITHUB_BUILD_NUMBER }}/" .env
+
+      - name: docker
         id: build-image
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./Dockerfile
           push: false
-          tags: my-app:${{ env.GITHUB_BUILD_NUMBER }}
-          build-args: GITHUB_BUILD_NUMBER=${{ env.GITHUB_BUILD_NUMBER }}
+          tags: my-app:${{ env.GITHUB_BUILD_NUMBER }},my-app:latest
 
-      - name: Push Docker image to Amazon ECR
+      - name: push docker
         if: ${{ success() }}
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./Dockerfile
-          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/myapp:${{ env.GITHUB_BUILD_NUMBER }}
+          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/myapp:${{ env.GITHUB_BUILD_NUMBER }},${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/myapp:latest
           push: true
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Log out of Amazon ECR
+      - name: logout ecr
         if: always()
         run: docker logout ${{ steps.login-ecr.outputs.registry }}

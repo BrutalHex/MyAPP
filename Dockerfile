@@ -10,10 +10,9 @@ RUN npm ci
 
 COPY . .
 
-ARG GITHUB_BUILD_NUMBER
-ENV VERSION=$GITHUB_BUILD_NUMBER
 
-RUN sed -i "s/^VERSION=.*/VERSION=${VERSION}/" .env
+
+ 
  
 
 RUN npm run build
